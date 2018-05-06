@@ -1,0 +1,50 @@
+#pragma once
+
+struct lex
+{ 
+    int   type;
+    char* pattern;
+    int   patternLen;
+    int   exitState;
+
+    int   priority;
+};
+
+class automat
+{   
+public:
+    automat(char* fileName);
+    ~automat();
+
+    bool parse(char* start);
+    int  cond();
+    int  len();
+
+private:
+    struct alpha
+    {  
+       int  symb;
+       char start;
+       char end;
+    };
+    
+    stuct condition
+    {
+       int   cond;
+       bool  terminal;
+
+       char* message;
+       int   code;
+    };
+
+    struct tripod
+    {
+       int  cond0;
+       int  symb;
+       int  cond1;
+    };
+
+    class tripodList : public List
+    {
+    }
+};

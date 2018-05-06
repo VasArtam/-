@@ -1,0 +1,5 @@
+# depslib dependency file v1.0
+1519649048 source:c:\users\lost_\desktop\compiler\test.cpp
+	<stdlib.h>
+	<cstdio>
+
