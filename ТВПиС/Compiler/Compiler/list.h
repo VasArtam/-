@@ -1,3 +1,5 @@
+#pragma once
+
 #include "heap.h"
 
 #define LISTSIZE 64
@@ -20,8 +22,8 @@ public:
 	void       sort(bool dir = true);
 
 
-        int        count();
-        bool       error(); { return error; } // true if error in last operation
+    int        count();
+    bool       call_error() { return error; } // true if error in last operation
 protected:
     virtual int compare (void* a, void* b) { return 0; }; //переопределяется каждым дочерним классом, возвращает -1, 0, 1
 
@@ -32,14 +34,14 @@ private:
 		Segment* prev; //предыдущий блок
 		Segment* next; //ледующий блок
 	};
-	Segment*         first; //первый сегмент
-	Segment*         last; //последний сегмент
-	int              first_index; //индекс первого элемента в первом блоке
-	int              last_index; //последний занятый элемент в последнем блоке
+	Segment*     first; //первый сегмент
+	Segment*     last; //последний сегмент
+	int          first_index; //индекс первого элемента в первом блоке
+	int          last_index; //последний занятый элемент в последнем блоке
 
-	int              element_size;
-	int              element_count;
-    bool             error;
+	int          element_size;
+	int          element_count;
+    bool         error;
 
 	void new_segment(); //получает память из heap
 	void delete_segment(Segment* seg); //возвращает память обратно

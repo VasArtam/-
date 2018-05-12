@@ -1,5 +1,18 @@
 # depslib dependency file v1.0
-1519649048 source:c:\users\lost_\desktop\compiler\test.cpp
+1520796356 source:c:\users\lost_\documents\codeblocks projects\compiler\list.cpp
+
+1520796363 source:c:\users\lost_\documents\codeblocks projects\compiler\list_adv.cpp
+
+1520796679 source:c:\users\lost_\documents\codeblocks projects\compiler\test.cpp
+	"heap.h"
+	"list.h"
+
+1522675952 c:\users\lost_\documents\codeblocks projects\compiler\heap.h
+
+1520796944 c:\users\lost_\documents\codeblocks projects\compiler\list.h
+	"heap.h"
+
+1522675943 source:c:\users\lost_\documents\codeblocks projects\compiler\heap.cpp
+	"heap.h"
 	<stdlib.h>
-	<cstdio>
 

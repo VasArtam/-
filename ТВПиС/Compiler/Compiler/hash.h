@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Heap.h"
 #include "List.h"
 

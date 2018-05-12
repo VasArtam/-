@@ -32,8 +32,11 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<Unit filename="hash.h" />
+		<Unit filename="heap.cpp" />
 		<Unit filename="heap.h" />
+		<Unit filename="list.cpp" />
 		<Unit filename="list.h" />
+		<Unit filename="list_adv.cpp" />
 		<Unit filename="list_adv.h" />
 		<Unit filename="test.cpp">
 			<Option compilerVar="CC" />
