@@ -38,9 +38,6 @@
 		<Unit filename="list.h" />
 		<Unit filename="list_adv.cpp" />
 		<Unit filename="list_adv.h" />
-		<Unit filename="main.cpp">
-			<Option compilerVar="CC" />
-		</Unit>
 		<Extensions>
 			<code_completion />
 			<envvars />
