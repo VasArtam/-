@@ -16,3 +16,21 @@
 	"heap.h"
 	<stdlib.h>
 
+1526207030 source:c:\users\lost_\documents\github\c\ÒÂÏèÑ\compiler\compiler\list.cpp
+
+1526207030 source:c:\users\lost_\documents\github\c\ÒÂÏèÑ\compiler\compiler\list_adv.cpp
+
+1526207818 source:c:\users\lost_\documents\github\c\ÒÂÏèÑ\compiler\compiler\main.cpp
+	"heap.h"
+	"list.h"
+	<clocale>
+
+1526207030 c:\users\lost_\documents\github\c\ÒÂÏèÑ\compiler\compiler\heap.h
+
+1526207030 c:\users\lost_\documents\github\c\ÒÂÏèÑ\compiler\compiler\list.h
+	"heap.h"
+
+1526207846 source:c:\users\lost_\documents\github\c\ÒÂÏèÑ\compiler\compiler\heap.cpp
+	"heap.h"
+	<stdlib.h>
+

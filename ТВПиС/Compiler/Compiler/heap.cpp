@@ -28,7 +28,7 @@ void*   Heap::get_mem(int size)
         //Если запрашиваемая память + занятая память + память,
         //отводимая под дескрипторы меньше, чем память,
         //занимаемая текущим сегментом, то:
-        if (size + memory + sizeof(Segment_def)*1024 < sizeof(t))
+        if (size + memory + sizeof(Segment_def)*1024 < sizeof(s))
         {
             //Ищем первый незанятый блок
             for (int i = 0; i < s->descriptor_count - 1; i++)
@@ -83,7 +83,7 @@ void    Heap::free_mem (void* offset)
         //Если адрес находится между адресом начала сегмента и
         //адресом его конца, то выполняем поиск в этом сегменте,
         if (s->descriptor[0].offset <= offset &&
-            (char*)s->descriptor[0].offset + sizeof(t) > offset)
+            (char*)s->descriptor[0].offset + sizeof(s) > offset)
         {
             //Проходим по всем дескрипторам нашего сегмента
             int i = 0;

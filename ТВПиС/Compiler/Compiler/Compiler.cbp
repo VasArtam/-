@@ -38,7 +38,7 @@
 		<Unit filename="list.h" />
 		<Unit filename="list_adv.cpp" />
 		<Unit filename="list_adv.h" />
-		<Unit filename="test.cpp">
+		<Unit filename="main.cpp">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Extensions>
