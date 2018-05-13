@@ -20,17 +20,15 @@
 
 1526207030 source:c:\users\lost_\documents\github\c\ÒÂÏèÑ\compiler\compiler\list_adv.cpp
 
-1526207818 source:c:\users\lost_\documents\github\c\ÒÂÏèÑ\compiler\compiler\main.cpp
-	"heap.h"
-	"list.h"
-	<clocale>
+1526212692 source:c:\users\lost_\documents\github\c\ÒÂÏèÑ\compiler\compiler\main.cpp
+	<windows.h>
 
 1526207030 c:\users\lost_\documents\github\c\ÒÂÏèÑ\compiler\compiler\heap.h
 
 1526207030 c:\users\lost_\documents\github\c\ÒÂÏèÑ\compiler\compiler\list.h
 	"heap.h"
 
-1526211102 source:c:\users\lost_\documents\github\c\ÒÂÏèÑ\compiler\compiler\heap.cpp
+1526212819 source:c:\users\lost_\documents\github\c\ÒÂÏèÑ\compiler\compiler\heap.cpp
 	"heap.h"
 	<stdlib.h>
 
