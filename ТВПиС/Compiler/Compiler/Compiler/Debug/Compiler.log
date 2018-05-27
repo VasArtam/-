@@ -1,1 +1,7 @@
-﻿  Compiler.vcxproj -> C:\Users\lost_\Documents\GitHub\C\ТВПиС\Compiler\Compiler\Debug\Compiler.exe
+﻿  stdafx.cpp
+  List_adv.cpp
+  List.cpp
+  Heap.cpp
+  Compiler.cpp
+  Создание кода...
+  Compiler.vcxproj -> C:\Users\lost_\Documents\GitHub\C\ТВПиС\Compiler\Compiler\Debug\Compiler.exe

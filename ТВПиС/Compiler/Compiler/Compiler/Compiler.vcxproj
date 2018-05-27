@@ -143,18 +143,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\..\CodeBlocks Projects\Compiler\hash.h" />
-    <ClInclude Include="..\..\..\..\..\..\CodeBlocks Projects\Compiler\heap.h" />
-    <ClInclude Include="..\..\..\..\..\..\CodeBlocks Projects\Compiler\list.h" />
-    <ClInclude Include="..\..\..\..\..\..\CodeBlocks Projects\Compiler\list_adv.h" />
+    <ClInclude Include="Hash.h" />
+    <ClInclude Include="Heap.h" />
+    <ClInclude Include="List.h" />
+    <ClInclude Include="List_adv.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\..\CodeBlocks Projects\Compiler\heap.cpp" />
-    <ClCompile Include="..\..\..\..\..\..\CodeBlocks Projects\Compiler\list.cpp" />
-    <ClCompile Include="..\..\..\..\..\..\CodeBlocks Projects\Compiler\list_adv.cpp" />
     <ClCompile Include="Compiler.cpp" />
+    <ClCompile Include="Heap.cpp" />
+    <ClCompile Include="List.cpp" />
+    <ClCompile Include="List_adv.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

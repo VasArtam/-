@@ -21,16 +21,16 @@
     <ClInclude Include="targetver.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\CodeBlocks Projects\Compiler\hash.h">
+    <ClInclude Include="Heap.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\CodeBlocks Projects\Compiler\heap.h">
+    <ClInclude Include="List.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\CodeBlocks Projects\Compiler\list.h">
+    <ClInclude Include="Hash.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\CodeBlocks Projects\Compiler\list_adv.h">
+    <ClInclude Include="List_adv.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
@@ -41,13 +41,13 @@
     <ClCompile Include="Compiler.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\CodeBlocks Projects\Compiler\heap.cpp">
+    <ClCompile Include="Heap.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\CodeBlocks Projects\Compiler\list.cpp">
+    <ClCompile Include="List.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\CodeBlocks Projects\Compiler\list_adv.cpp">
+    <ClCompile Include="List_adv.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
