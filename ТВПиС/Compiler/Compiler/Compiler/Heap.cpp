@@ -73,11 +73,11 @@ void* Heap::get_mem(int size)
 	s = current;
 
 	//Маленький брат занимает место большого брата
-	s->descriptor[s->descriptor_count].offset = s->descriptor[0].offset;
+	s->descriptor[1].offset = s->descriptor[0].offset;
 	//Размер маленького брата - размер запрашиваемой памяти
-	s->descriptor[s->descriptor_count].size = size;
+	s->descriptor[1].size = size;
 	//Маленький брат используется
-	s->descriptor[s->descriptor_count].used = true;
+	s->descriptor[1].used = true;
 
 	//Увеличиваем количество дескрипторов
 	s->descriptor_count++;
@@ -89,7 +89,7 @@ void* Heap::get_mem(int size)
 	//Большой брат не используется
 	s->descriptor[0].used = false;
 
-	return current->descriptor[0].offset;
+	return current->descriptor[1].offset;
 };
 
 void Heap::free_mem(void* offset)
@@ -106,7 +106,7 @@ void Heap::free_mem(void* offset)
 			//Ищем в дескрипторах адрес блока
 			//Важно: если адрес будет попадать на сам дескриптор, ничего не произойдет
 			int i = 0;
-			while (i < s->descriptor_count - 1)
+			while (i < s->descriptor_count)
 			{
 				//Если мы нашли нужный адрес, производим освобождение
 				if (s->descriptor[i].offset == offset)
@@ -135,14 +135,18 @@ void Heap::free_mem(void* offset)
 
 					bool empty = true;
 
-					for (int j = 0; i < s->descriptor_count - 1; i++)
+					for (int j = 0; j < s->descriptor_count - 1; j++)
 					{
-						if (s->descriptor[i].used = true) break;
+						if (s->descriptor[j].used = true)
+						{
+							empty = false;
+							break;
+						}
 					}
 
 					if (empty)
 					{
-						//delete_segment(s);
+						free(s);
 					}
 
 					return;
@@ -162,7 +166,7 @@ void Heap::make_segment()
 	temp->data = temp + sizeof(Segment_def) * 1024; //Указатель на часть с данными
 	temp->prev = current; //Предыдущий сегмент - текущий
 
-						  //Задаем параметры первого блока
+	//Задаем параметры первого блока
 	temp->descriptor[0].used = false;
 	temp->descriptor[0].size = sizeof(temp) - sizeof(Segment_def) * 1024; //Размер всего сегмента минус размер массива дескрипторов
 	temp->descriptor[0].offset = temp->data; //Указатель на часть данными
@@ -174,21 +178,27 @@ void Heap::make_segment()
 
 void Heap::delete_segments()
 {
-	Segment* temp;
-	while (current != 0)
+	while (true)
 	{
-		if (current->prev == 0 || current->prev == nullptr)
+		Segment* s = current;
+
+		//Очищение данных в дескрипторах
+		for (int i = 0; i < s->descriptor_count; i++)
 		{
-			//temp = current.prev;
-			free(current->data);
-			temp = nullptr;
+			s->descriptor[i].used = false;
+			s->descriptor[i].size = 0;
+			s->descriptor[i].offset = nullptr;
 		}
-		else
+
+		//Сегмент - последний
+		if (current->prev == nullptr)
 		{
-			temp = current->prev;
-			current = nullptr;
+			free(current);
+			make_segment(); //создадим новый пустой
+			return;
 		}
-		current = nullptr;
-		current = temp;
+
+		current = current->prev;
+		free(s);
 	}
 };
