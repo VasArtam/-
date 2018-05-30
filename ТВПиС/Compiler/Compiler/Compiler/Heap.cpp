@@ -11,56 +11,39 @@ void* Heap::get_mem(int size)
 
 	while (s != nullptr)
 	{
-		int memory = 0;
-
-		//Подсчитаем свободную память
-		for (int i = 0; i < s->descriptor_count; i++)
+		int descriptor_count = s->descriptor_count;
+		//Сначала ищем дескриптор с таким размером памяти, который нужен
+		for (int i = 0; i < descriptor_count; i++)
 		{
-			if (!s->descriptor[i].used)
+			Segment_def* descriptor = &s->descriptor[i];
+			if (!descriptor->used && descriptor->size == size)
 			{
-				memory += s->descriptor[i].size;
+				descriptor->used = true; //помечаем его занятым
+				return descriptor->offset; //возвращаем указатель на область данных
 			}
 		}
 
-		//Если свободной памяти больше, чем требуется (не факт, что найдется место)
-		if (memory >= size)
+		//Ищем блок с размером больше чем требуется, идем с конца, чтобы смещать меньше дескрипторов
+		for (int i = descriptor_count - 1; i >= 0; i--)
 		{
-			//Ищем первый незанятый блок
-			for (int i = 0; i < s->descriptor_count; i++)
+			Segment_def* descriptor = &s->descriptor[i];
+			//Если нашли незанятый блок и его размер больше запрашиваемого размера
+			if (!descriptor->used && descriptor->size > size)
 			{
-				//Если нашли незанятый блок и его размер равен запрашиваемому размеру
-				if (!s->descriptor[i].used && s->descriptor[i].size == size)
+				//Если места на дескрипторы больше нет, то отдаем этот
+				if (descriptor_count == DESCRIPTORCOUNT)
 				{
-					s->descriptor[i].used = true; //помечаем его занятым
-					return s->descriptor[i].offset; //возвращаем указатель на него
+					descriptor->used = true; //помечаем его занятым
 				}
-				//Если нашли незанятый блок и его размер больше запрашиваемого размера
-				else if (!s->descriptor[i].used && s->descriptor[i].size > size)
+				else
 				{
-					//Большой брат = блок, который делят
-					//Маленький брат = новый блок
-
-					//Маленький брат занимает место большого брата
-					s->descriptor[s->descriptor_count].offset = s->descriptor[i].offset;
-					//Размер маленького брата - размер запрашиваемой памяти
-					s->descriptor[s->descriptor_count].size = size;
-					//Маленький брат используется
-					s->descriptor[s->descriptor_count].used = true;
-
-					//Увеличиваем количество дескрипторов
-					s->descriptor_count++;
-
-					//Большой брат переезжает вперед на размер запрашиваемой памяти
-					s->descriptor[i].offset = (char*)s->descriptor[i].offset + size;
-					//Размер большого брата становится меньше
-					s->descriptor[i].size -= size;
-					//Большой брат не используется
-					s->descriptor[i].used = false;
-
-					return s->descriptor[s->descriptor_count].offset;
+					split_descriptor(s, i, size);
 				}
+				
+				return descriptor->offset; //возвращаем указатель на область данных
 			}
 		}
+
 		//Если же в этом сегменте нет свободной памяти,
 		//то повторим все то же самое для предыдущего сегмента
 		s = s->prev;
@@ -70,27 +53,33 @@ void* Heap::get_mem(int size)
 	//то создадим новый
 	make_segment();
 
-	s = current;
+	split_descriptor(current, 0, size);
 
-	//Маленький брат занимает место большого брата
-	s->descriptor[1].offset = s->descriptor[0].offset;
-	//Размер маленького брата - размер запрашиваемой памяти
-	s->descriptor[1].size = size;
-	//Маленький брат используется
-	s->descriptor[1].used = true;
+	return current->descriptor[0].offset;
+};
+
+void Heap::split_descriptor(Heap::Segment* s, int position, int size)
+{
+	Segment_def* descriptor = &s->descriptor[position];
+	//смещаем все дескрипторы того, который надо разделить, делаем место для нового
+	for (int j = s->descriptor_count; j > position + 1; ++j)
+	{
+		s->descriptor[j] = s->descriptor[j - 1];
+	}
+
+	Segment_def* next_descriptor = &s->descriptor[position + 1];
+
+	next_descriptor->size = descriptor->size - size;
+	next_descriptor->offset = (void*)(int(descriptor->offset) + size);
+	next_descriptor->used = false;
+
+	descriptor->size = size;
+	descriptor->used = true;
 
 	//Увеличиваем количество дескрипторов
-	s->descriptor_count++;
+	++s->descriptor_count;
+}
 
-	//Большой брат переезжает вперед на размер запрашиваемой памяти
-	s->descriptor[0].offset = (char*)s->descriptor[0].offset + size;
-	//Размер большого брата становится меньше
-	s->descriptor[0].size -= size;
-	//Большой брат не используется
-	s->descriptor[0].used = false;
-
-	return current->descriptor[1].offset;
-};
 
 void Heap::free_mem(void* offset)
 {
@@ -101,77 +90,103 @@ void Heap::free_mem(void* offset)
 	while (s != nullptr)
 	{
 		//Если адрес находится между адресом начала сегмента и адресом его конца, то выполняем поиск в этом сегменте
-		if (s <= offset && s + sizeof(s) > offset)
+		if (s > offset || s + segment_size <= offset)
 		{
-			//Ищем в дескрипторах адрес блока
-			//Важно: если адрес будет попадать на сам дескриптор, ничего не произойдет
-			int i = 0;
-			while (i < s->descriptor_count)
-			{
-				//Если мы нашли нужный адрес, производим освобождение
-				if (s->descriptor[i].offset == offset)
-				{
-					s->descriptor[i].used = false;
-
-					free(s->descriptor[i].offset);
-
-					//Объединим соседние блоки, если какие-то из них пустые
-					if (i >= 1 && s->descriptor[i - 1].used == false)
-					{
-						s->descriptor[i - 1].size += s->descriptor[i].size;
-						s->descriptor[i].size = 0;
-						s->descriptor[i].offset = s->descriptor[i - 1].offset;
-					}
-					if (i <= s->descriptor_count - 1 && s->descriptor[i + 1].used == false)
-					{
-						s->descriptor[i].size += s->descriptor[i + 1].size;
-						s->descriptor[i + 1].size = 0;
-						s->descriptor[i + 1].offset = s->descriptor[i].offset;
-					}
-
-					//Если в сегменте больше не осталось занятых блоков
-					//и это не последний оставшийся сегмент,
-					//то удалим этот сегмент.
-
-					bool empty = true;
-
-					for (int j = 0; j < s->descriptor_count - 1; j++)
-					{
-						if (s->descriptor[j].used = true)
-						{
-							empty = false;
-							break;
-						}
-					}
-
-					if (empty)
-					{
-						free(s);
-					}
-
-					return;
-				}
-				//Если нет - то идем к следующему адресу
-				i++;
-			}
+			//Если такого нет, то идем к предыдущему сегменту
+			s = s->prev;
 		}
-		//Если такого нет, то идем к предыдущему сегменту
-		s = s->prev;
+
+		int descriptor_count = s->descriptor_count;
+		//Ищем в дескрипторах адрес блока
+		//Важно: если адрес будет попадать на сам дескриптор, ничего не произойдет
+		for (int i = 0; i < descriptor_count; ++i)
+		{
+			Segment_def* descriptor = &s->descriptor[i];
+			if (descriptor->offset != offset) continue;
+
+			//Если мы нашли нужный адрес, производим освобождение
+			descriptor->used = false;
+
+			int movefrom = i;
+			int moveto = i;
+			Segment_def* prev_descriptor = &s->descriptor[i - 1];
+
+			//Объединим соседние блоки, если какие-то из них пустые
+			if (i != 0 && prev_descriptor->used == false)
+			{
+				prev_descriptor->size += descriptor->size;
+				++movefrom;
+			}
+
+			Segment_def* next_descriptor = &s->descriptor[i + 1];
+			if (i != descriptor_count - 1 && next_descriptor->used == false)
+			{
+				if (movefrom != i)
+				{
+					prev_descriptor->size += next_descriptor->size;
+					++movefrom;
+				}
+				else
+				{
+					descriptor->size += next_descriptor->size;
+					descriptor->used = false;
+					movefrom += 2;
+					++moveto;
+				}
+			}
+
+			//смещаем дескрипторы
+			if (moveto != movefrom)
+			{
+				while (movefrom < descriptor_count)
+				{
+					s->descriptor[moveto++] = s->descriptor[movefrom++];
+				}
+
+				s->descriptor_count -= movefrom - moveto;
+			}
+
+
+			//Если в сегменте больше не осталось занятых блоков
+			//и это не последний оставшийся сегмент,
+			//то удалим этот сегмент.
+
+			bool empty = true;
+
+			for (int j = 0; j < s->descriptor_count - 1; j++)
+			{
+				if (s->descriptor[j].used)
+				{
+					empty = false;
+					break;
+				}
+			}
+
+			if (empty)
+			{
+				current = s->prev;
+				free(s);
+			}
+
+			return;
+		}
 	}
 };
 
 void Heap::make_segment()
 {
 	Segment* temp = (Segment*)malloc(segment_size); //Выделяем память под новый сегмент
-	temp->data = temp + sizeof(Segment_def) * 1024; //Указатель на часть с данными
+	const unsigned descriptors_size = sizeof(Segment_def) * 1024;
+	temp->data = temp + descriptors_size; //Указатель на часть с данными
 	temp->prev = current; //Предыдущий сегмент - текущий
 
+	Segment_def* first_descriptor = &temp->descriptor[0];
 	//Задаем параметры первого блока
-	temp->descriptor[0].used = false;
-	temp->descriptor[0].size = sizeof(temp) - sizeof(Segment_def) * 1024; //Размер всего сегмента минус размер массива дескрипторов
-	temp->descriptor[0].offset = temp->data; //Указатель на часть данными
+	first_descriptor->used = false;
+	first_descriptor->size = segment_size - descriptors_size; //Размер всего сегмента минус размер массива дескрипторов
+	first_descriptor->offset = temp->data; //Указатель на часть данными
 
-	temp->descriptor_count = 1; //Количество используемых блоков - 1
+	temp->descriptor_count = 1; //Количество блоков - 1
 
 	current = temp; //Текущий становится новым
 };

@@ -9,6 +9,7 @@ public:
 	Heap(int _segment_size = SEGMENTSIZE)
 	{
 		segment_size = _segment_size;
+		current = nullptr;
 	};
 	~Heap()
 	{
@@ -37,6 +38,8 @@ private:
 	};
 
 	void make_segment(); //создает новый сегмент, устанавливает current на этот сегмент
+
+	void split_descriptor(Segment* s, int position, int size);
 
 	void delete_segments(); //удаляет все сегменты
 
