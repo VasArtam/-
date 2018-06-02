@@ -6,19 +6,14 @@
 class Heap
 {
 public:
-	Heap(int _segment_size = SEGMENTSIZE)
-	{
-		segment_size = _segment_size;
-		current = nullptr;
-	};
-	~Heap()
-	{
-		delete_segments();
-	};
+	Heap(int _segment_size = SEGMENTSIZE);
+	~Heap();
 
-	void* get_mem(int size); //возвращает offset найденного блока
+	//Возвращает offset найденного блока
+	void* get_mem(int size);
 
-	void free_mem(void*); //освобождает память по адресу блока
+	//Освобождает память по адресу блока
+	void free_mem(void*);
 
 private:
 	struct Segment_def
@@ -31,19 +26,29 @@ private:
 	struct Segment
 	{
 		void* data;
-		Segment* prev; //указатель на предыдущий сегмент
-		Segment_def descriptor[DESCRIPTORCOUNT]; //массив дескрипторов
-		int descriptor_count; //текущее количество дескрипторов (как ID: auto-increment и только увеличивается)
-		//последний дескриптор сегмента - тот, от которого откусывали новые блоки
+
+		//Указатель на предыдущий сегмент
+		Segment* prev;
+
+		//Массив дескрипторов
+		Segment_def descriptor[DESCRIPTORCOUNT];
+
+		//Текущее количество дескрипторов (как ID: auto-increment и только увеличивается)
+		int descriptor_count;
 	};
 
-	void make_segment(); //создает новый сегмент, устанавливает current на этот сегмент
+	//Создает новый сегмент, устанавливает current на этот сегмент
+	void make_segment();
 
+	//Смещает все блоки после текущего на одну позицию вверх, текущий разделяет на два
 	void split_descriptor(Segment* s, int position, int size);
 
-	void delete_segments(); //удаляет все сегменты
+	//Удаляет все сегменты
+	void delete_segments();
 
-	int segment_size; //переменная размера сегмента, просто вытягивает глобальную переменную
+	//Переменная размера сегмента, просто вытягивает глобальную переменную
+	int segment_size;
 
-	Segment* current; //текущий сегмент
+	//Текущий сегмент
+	Segment* current;
 };

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "../Compiler/Heap.h"
 #include "../Compiler/Heap.cpp"
+#include <tchar.h>
 
 TEST(HeapTest, Second_Allocation_Is_Near_First_Allocation)
 {
@@ -19,4 +20,14 @@ TEST(HeapTest, Test_Free)
 	heap->free_mem(memory1);
 }
 
+TEST(HeapTest, Memory)
+{
+	int integer = 10;
+	void* p = &integer;
 
+	p = static_cast<char*>(p) + 1;
+
+	p = &integer;
+	p = static_cast<int*>(p) + 1;
+
+}

@@ -11,12 +11,12 @@ public:
 	~List();
 
 	//при вызове необходимо типизировать, возвращает указатель на конкретные данные
-	void*      get(int pos);
-	void       add(void* data);
+	void*      get(int pos); //извлечение и исключение из списка, возвращает указатель по номеру из списка
+	void       add(void* data); //push в конец списка, добавляет данные по указателю
 
-	//returns and deletes elements
-	void       take_first(void* store); //начальный индекс слезает на 1 позицию вниз. если сделать достаточное количество раз, можно опустошить сегмент
-	void       take_last(void* store); // конечный индекс слезает вверх. по аналогии
+	//извлечение элемента в store и исключение из списка
+	void       take_first(void* store); //начальный индекс слезает на 1 позицию вниз
+	void       take_last(void* store); //конечный индекс слезает вверх. по аналогии
 	void       take(int pos, void* store);
 	//вызывает compare
 	void       sort(bool dir = true);
@@ -32,7 +32,7 @@ private:
 	{
 		void*    data; //указывает на начало блока
 		Segment* prev; //предыдущий блок
-		Segment* next; //ледующий блок
+		Segment* next; //следующий блок
 	};
 	Segment*     first; //первый сегмент
 	Segment*     last; //последний сегмент
