@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "heap.h"
+#include "Heap.h"
 
 using namespace std;
 
@@ -12,6 +12,12 @@ Heap::Heap(int _segment_size)
 Heap::~Heap()
 {
 	delete_segments();
+}
+
+Heap& Heap::Instance(int segmentSize)
+{
+	static Heap _instance(segmentSize);
+	return _instance;
 }
 
 void* Heap::get_mem(int size)
@@ -200,7 +206,7 @@ void Heap::free_mem(void* offset)
 
 void Heap::make_segment()
 {
-	Segment* temp = (Segment*)malloc(segment_size); //Выделяем память под новый сегмент
+	Segment* temp = static_cast<Segment*>(malloc(segment_size)); //Выделяем память под новый сегмент
 	const unsigned descriptors_size = sizeof(Segment_def) * 1024;
 	temp->data = temp + descriptors_size; //Указатель на часть с данными
 	temp->prev = current; //Предыдущий сегмент - текущий

@@ -15,6 +15,9 @@ public:
 	//Освобождает память по адресу блока
 	void free_mem(void*);
 
+	//Нужно, чтобы экземпляр Heap всегда был один
+	static Heap& Instance(int segmentSize = SEGMENTSIZE);
+
 private:
 	struct Segment_def
 	{

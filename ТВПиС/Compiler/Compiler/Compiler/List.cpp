@@ -13,10 +13,10 @@ List::List(int elementSize, int elementCount)
 
 	this->error = false;
 
-	this->segmentCount = 0;
+	this->segment_count = 0;
 
 	this->first = this->last = nullptr;
-	this->firstIndex = this->lastIndex = 0;
+	this->first_index = this->last_index = 0;
 }
 
 List::~List()
@@ -24,28 +24,28 @@ List::~List()
 	Segment* i = first;
 	while (i)
 	{
-		DeleteSegment(i);
+		delete_segment(i);
 		i = i->next;
 	}
 	first = last = nullptr;
-	firstIndex = lastIndex = 0;
+	first_index = last_index = 0;
 	element_size = element_count = 0;
-	segmentCount = 0;
+	segment_count = 0;
 }
 
 void* List::get(int pos)
 {
-	if (Count() == 0) return nullptr;
-	void* data = Heap::Instance().GetMemory(sizeof(element_size));
-	Take(pos, data);
+	if (count() == 0) return nullptr;
+	void* data = Heap::Instance().get_mem(sizeof(element_size));
+	take(pos, data);
 	return data;
 }
 
-List::Segment* List::GetSegment(int id)
+List::Segment* get_segment(int id)
 {
 	Segment* i = first;
 	int n = 0;
-	if (id > segmentCount || id < 0) return nullptr;
+	if (id > segment_count || id < 0) return nullptr;
 
 	while (n != id)
 	{
@@ -55,104 +55,102 @@ List::Segment* List::GetSegment(int id)
 	return i;
 }
 
-void List::CopyElement(void* destination, void* source)
+void List::copy_element(void* destination, void* source) const
 {
 	for (int i = 0; i < element_size; i++)
-		*((char*)destination + i) = *((char*)source + i);
+		*(static_cast<char*>(destination) + i) = *(static_cast<char*>(source) + i);
 }
 
 void List::add(void* data)
 {
 	if (data == nullptr)
-		return nullptr;
+		throw new bad_alloc;
 
-	int segmentNumber = lastIndex / element_count;
-	int cell = lastIndex % element_count;
+	const int segmentNumber = last_index / element_count;
+	const int cell = last_index % element_count;
 
-	Segment* segment = (cell == 0) ? NewSegment() : GetSegment(segmentNumber);
+	Segment* segment = (cell == 0) ? new_segment() : get_segment(segmentNumber);
 
-	char* offset = (char*)segment->data + (cell * element_size);
+	char* offset = static_cast<char*>(segment->data) + (cell * element_size);
 
-	CopyElement(offset, data);
+	copy_element(offset, data);
 
-	lastIndex++;
+	last_index++;
 
 	return offset;
 }
 
-void List::TakeFirst(void* store)
+void List::take_first(void* store)
 {
-	if (Count() == 0)
+	if (count() == 0)
 	{
 		store = nullptr;
 		return;
 	}
-	char* source = (char*)first->data + firstIndex * element_size;
-	CopyElement(store, source);
-	firstIndex++;
+	char* source = (char*)first->data + first_index * element_size;
+	copy_element(store, source);
+	first_index++;
 
-	if (firstIndex == element_count)
+	if (first_index == element_count)
 	{
-		firstIndex -= element_count;
-		lastIndex -= element_count;
-		DeleteSegment(first);
+		first_index -= element_count;
+		last_index -= element_count;
+		delete_segment(first);
 	}
 }
 
-void List::TakeLast(void* store)
+void List::take_last(void* store)
 {
-	if (Count() == 0)
+	if (count() == 0)
 	{
 		store = nullptr;
 		return;
 	}
-	char* source = (char*)last->data + ((lastIndex - 1) % element_count)*element_size;
-	CopyElement(store, source);
-	lastIndex--;
+	char* source = (char*)last->data + ((last_index - 1) % element_count)*element_size;
+	copy_element(store, source);
+	last_index--;
 
-	if (lastIndex % element_count == 0)
+	if (last_index % element_count == 0)
 	{
-		DeleteSegment(last);
+		delete_segment(last);
 	}
 }
 
-void List::Take(int pos, void* store)
+void List::take(int pos, void* store)
 {
-	if (Count() == 0)
+	if (count() == 0)
 	{
 		store = nullptr;
 		return;
 	}
 	if (pos == 0)
 	{
-		TakeFirst(store);
+		take_first(store);
 		return;
 	}
-	if (pos == firstIndex + lastIndex - 1)
+	if (pos == first_index + last_index - 1)
 	{
-		TakeLast(store);
+		take_last(store);
 		return;
 	}
 
-	pos += firstIndex;
-	Segment* currentSegment = GetSegment(pos / element_count);
+	pos += first_index;
+	Segment* currentSegment = get_segment(pos / element_count);
 	int elementIndex = pos % element_count;
 
 	char* source = (char*)currentSegment->data + elementIndex * element_size;
-	CopyElement(store, source);
+	copy_element(store, source);
 
-	char* destination;
-
-	while (pos != lastIndex)
+	while (pos != last_index)
 	{
-		destination = (char*)currentSegment->data + elementIndex * element_size;
+		char* destination = static_cast<char*>(currentSegment->data) + elementIndex * element_size;
 
 		if (elementIndex < element_count - 1)
-			source = (char*)currentSegment->data + (elementIndex + 1)*element_size;
+			source = static_cast<char*>(currentSegment->data) + (elementIndex + 1)*element_size;
 		else
-			source = (char*)currentSegment->next->data;
+			source = static_cast<char*>(currentSegment->next->data);
 
-		CopyElement(destination, source);
+		copy_element(destination, source);
 		elementIndex++;
 		pos++;
 
@@ -163,14 +161,9 @@ void List::Take(int pos, void* store)
 		}
 	}
 
-	if (IsFree(currentSegment)) DeleteSegment(currentSegment);
+	bool free = false;
 
-
-	lastIndex--;
-}
-
-bool List::IsFree(Segment* segment)
-{
+	//проверка, пустой ли текущий сегмент
 	Segment* i = first;
 	int j = 0;
 	while (i)
@@ -179,25 +172,27 @@ bool List::IsFree(Segment* segment)
 		i = i->next;
 	}
 
-	if (lastIndex /*+ firstIndex*/ <= (j - 1)*element_count)
-		return true;
+	if (last_index /*+ firstIndex*/ <= (j - 1)*element_count) free = true;
 
-	return false;
+	if (free) delete_segment(currentSegment);
+
+
+	last_index--;
 }
 
-void List::Sort(bool dir, SortingMethod method) {}
+void List::sort(bool dir) {}
 
-int List::Count()
+int List::count() const
 {
-	return (lastIndex - firstIndex);
+	return last_index - first_index;
 }
 
-bool List::Error()
+bool List::call_error() const
 {
 	return error;
 }
 
-List::Segment* List::NewSegment()
+void List::new_segment()
 {
 	Segment* temp = new Segment();
 
@@ -206,7 +201,6 @@ List::Segment* List::NewSegment()
 		first = last = temp;
 		first->next = first->prev = nullptr;
 	}
-
 	else
 	{
 		last->next = temp;
@@ -216,34 +210,34 @@ List::Segment* List::NewSegment()
 
 	try
 	{
-		temp->data = Heap::Instance().GetMemory(element_count*element_size);
+		temp->data = Heap::Instance().get_mem(element_count*element_size);
 	}
 	catch (bad_alloc)
 	{
 		error = true;
-		return nullptr;
+		return;
 	}
 
-	segmentCount++;
+	segment_count++;
 	return temp;
 }
 
-void List::DeleteSegment(Segment* segment)
+void List::delete_segment(Segment* segment)
 {
 	if (segment == first) first = first->next;
 	if (segment == last) last = last->prev;
 
 	if (segment->prev) segment->prev->next = segment->next;
 	if (segment->next) segment->next->prev = segment->prev;
-	Heap::Instance().FreeMemory(segment->data);
-	segmentCount--;
+	Heap::Instance().free_mem(segment->data);
+	segment_count--;
 }
 
-void* List::GetAccessor(int n)
+/*void* List::GetAccessor(int n)
 {
-	n += firstIndex;
+	n += first_index;
 
-	if (n >= lastIndex)
+	if (n >= last_index)
 		throw Exceptions::ArgumentOutOfRange;
 
 	Segment* currentSegment = GetSegment(n / element_count);
@@ -255,18 +249,18 @@ void* List::GetAccessor(int n)
 
 void List::SetAccessor(void* data, int n)
 {
-	n += firstIndex;
+	n += first_index;
 	Segment* currentSegment = GetSegment(n / element_count);
 	int elementIndex = n % element_count;
 
 	char* source = (char*)currentSegment->data + elementIndex * element_size;
-	CopyElement(source, data);
-}
+	copy_element(source, data);
+}*/
 
-void List::Swap(int a, int b)
+void List::swap(int a, int b)
 {
-	void* temp = Heap::Instance().GetMemory(element_size);
-	CopyElement(temp, GetAccessor(a));
+	void* temp = Heap::Instance().get_mem(element_size);
+	copy_element(temp, GetAccessor(a));
 	SetAccessor(GetAccessor(b), a);
 	SetAccessor(temp, b);
 }
