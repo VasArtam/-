@@ -47,7 +47,7 @@
     <ClCompile Include="List.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="List_adv.cpp">
+    <ClCompile Include="Hash.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>

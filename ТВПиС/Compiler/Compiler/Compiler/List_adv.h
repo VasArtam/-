@@ -21,7 +21,7 @@ public:
 	double get() { double res; take_first(&res); return res; };
 };
 
-class Deque
+class Deque : List
 {
 public:
 	Deque() : List(sizeof(double)) {};
@@ -29,6 +29,6 @@ public:
 
 	void   put(double x) { add(&x); };
 	double first() { double res; take_first(&res); return res; };
-	double last() { double res; take_list(&res); return res; };
+	double last() { double res; take_last(&res); return res; };
 
 };
