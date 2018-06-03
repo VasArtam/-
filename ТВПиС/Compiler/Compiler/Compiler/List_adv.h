@@ -1,4 +1,5 @@
 #pragma once
+#include "List.h"
 
 class Stack : List
 {
