@@ -28,6 +28,7 @@ public:
 
 	int        count() const; //“екущее количество элементов в списке
 	bool       call_error() const; //True, если возникла ошибка в последней операции
+
 protected:
 	virtual int compare(void* a, void* b) { return 0; }; //ѕереопредел€етс€ каждым дочерним классом, возвращает -1, 0, 1
 

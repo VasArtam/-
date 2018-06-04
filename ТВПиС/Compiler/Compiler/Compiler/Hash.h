@@ -12,10 +12,10 @@ public:
 	Hash(int _n1 = 0, int _n2 = 0, int _n3 = 0, int _n4 = 0, int _n5 = 0); //области значений каждой из пяти функций (таблица 3*3 - 3 3 0 0 0)
 	~Hash();
 
-	//самая важная функция, получает ключевое слово и возвращает указатель на отдельный лист
+	//Самая важная функция, получает ключевое слово и возвращает указатель на отдельный лист
 	List* find_list(char* key_word);;
 
-	//переопределить, можно использовать до 5 функций
+	//Переопределить, можно использовать до 5 функций
 	virtual int key1(char* key_word) { return 0; };
 	virtual int key2(char* key_word) { return 0; };
 	virtual int key3(char* key_word) { return 0; };
@@ -23,23 +23,23 @@ public:
 	virtual int key5(char* key_word) { return 0; };
 
 protected:
-	//определяет позицию в векторе из указателей
+	//Определяет позицию в векторе из указателей
 	int combine_keys(char* key_word);;
 
 private:
 	List** table; //сама хэш-таблица
-	int    n1, n2, n3, n4, n5; //ее ключи
+	int    n1, n2, n3, n4, n5; //Области значений
 };
 
-//отдельный элемент в листе
+//Отдельная запись "слово-толкование"
 struct Article
 {
 	char* word;
 	char* description;
 };
 
-//сам лист
-class Diction_list : List
+//Лист словаря
+class Diction_list : public List
 {
 public:
 	Diction_list();

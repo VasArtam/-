@@ -19,8 +19,7 @@ Hash::~Hash()
 {
 	if (table)
 	{
-		int capacity = combine_keys(n1, n2, n3, n4, n5) + 1;
-		for (int i = 0; i < capacity; i++)
+		for (int i = 0; i < n1 * n2 * n3 * n4 * n5; i++)
 		{
 			if (table[i])
 			{
@@ -35,7 +34,10 @@ Hash::~Hash()
 
 List* Hash::find_list(char* key_word)
 {
-	return table[combine_keys(key_word)];
+	if (key_word)
+		return table[combine_keys(key_word)];
+
+	return nullptr;
 }
 
 int Hash::combine_keys(char* key_word)
@@ -50,22 +52,57 @@ int Hash::combine_keys(char* key_word)
 
 Diction_list::Diction_list(): List(sizeof(Article))
 {
+	Article* article = nullptr;
+	article->word = "";
+	article->description = "";
+
+	put(article);
 }
 
 Diction_list::~Diction_list()
 {
+	int c = this->count();
+	while (c > 0)
+	{
+		take_last(nullptr);
+		c--;
+	}
 }
 
-void Diction_list::put(Article * article)
+void Diction_list::put(Article* article)
 {
+	this->add(article);
 }
 
 Article* Diction_list::find(char* word)
 {
+	Article* article;
+
+	for (int i = 0; i < this->count(); i++)
+	{
+		if ((article = static_cast<Article*>(this->get(i)))->word == word)
+		{
+			return article;
+		}
+	}
+
+	return nullptr;
 }
 
 void Diction_list::del(char* word)
 {
+	if (word)
+	{
+		Article* article;
+		for (int i = 0; i < this->count(); i++)
+		{
+			if ((article = static_cast<Article*>(this->get(i)))->word == word)
+			{
+				take(i, nullptr);
+				return;
+			}
+		}
+	}
 }
 
 void Diction_list::del(Article* article)
@@ -73,7 +110,7 @@ void Diction_list::del(Article* article)
 	del(article->word);
 }
 
-Diction::Diction(): Hash(33, 33, 0, 0, 0)
+Diction::Diction() : Hash(33, 33, 0, 0, 0)
 {
 }
 
@@ -95,31 +132,43 @@ int Diction::key2(char* key_word)
 
 Article* Diction::find(char* word)
 {
-	Diction_list* list = (Diction_list*)find_list(word);
-	return list ? list->find(word) : nullptr;
-}
+	List* list = nullptr;
 
-Article* Diction::auto_create(char * word)
-{
+	if ((list = find_list(word)) != nullptr)
+	{
+		Article* article = nullptr;
+
+		for (int i = 0; i < list->count(); i++)
+		{
+			if ((article = static_cast<Article*>(list->get(i)))->word == word)
+			{
+				return article;
+			}
+		}
+	}
+
 	return nullptr;
 }
 
-
-
-List* Hash::FindList(char* keyWord)
+Article* Diction::auto_create(char* word)
 {
-	if (keyWord)
-		return table[CombineKeys(Key1(keyWord), Key2(keyWord), Key3(keyWord), Key4(keyWord), Key5(keyWord))];
+	if (word && find(word) == nullptr)
+	{
+		Article* article = nullptr;
+		article->word = word;
+		article->description = "";
 
+		List* list = this->find_list(word);
+		list->add(article);
+
+		for (int i = 0; i < list->count(); i++)
+		{
+			if ((article = static_cast<Article*>(list->get(i)))->word == word)
+			{
+				return article;
+			}
+		}
+	}
+	else return find(word);
 	return nullptr;
 }
-
-unsigned int Hash::CombineKeys(unsigned int key1, unsigned int key2, unsigned int key3, unsigned int key4, unsigned int key5)
-{
-	return	n1 ? key1 % (n1 + 1) : 0 +
-		n2 ? key2 % (n2 + 1) : 0 +
-		n3 ? key3 % (n3 + 1) : 0 +
-		n4 ? key4 % (n4 + 1) : 0 +
-		n5 ? key5 % (n5 + 1) : 0;
-}
-
