@@ -9,7 +9,7 @@
 class List
 {
 public:
-	List(int _element_size, int _element_count = LISTSIZE);
+	List(int element_size, int element_count = LISTSIZE);
 	virtual ~List();
 
 	//Возвращает указатель на конкретные данные, при вызове необходимо типизировать
@@ -29,16 +29,25 @@ public:
 	int        count() const; //Текущее количество элементов в списке
 	bool       call_error() const; //True, если возникла ошибка в последней операции
 
+	void set_accessor(void*, int);
+	void* get_accessor(int);
+	void swap(int a, int b);
+
 protected:
 	virtual int compare(void* a, void* b) { return 0; }; //Переопределяется каждым дочерним классом, возвращает -1, 0, 1
 
-private:
 	struct Segment
 	{
-		void*    data; //Указывает на начало данных в сегменте
-		Segment* prev; //Предыдущий сегмент
-		Segment* next; //Следующий сегмент
+		void*    data;
+		Segment* prev;
+		Segment* next;
 	};
+
+	Segment* get_segment(int) const;
+
+	bool is_free(Segment*) const;
+
+private:
 	Segment*     first; //Первый сегмент
 	Segment*     last; //Последний сегмент
 	int          first_index; //Номер первого элемента

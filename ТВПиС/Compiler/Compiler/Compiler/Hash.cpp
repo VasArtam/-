@@ -1,6 +1,7 @@
 #include "Hash.h"
 #include "stdafx.h"
 #include <exception>
+#include "TValueKeeper.h"
 
 using namespace std;
 
@@ -11,7 +12,9 @@ Hash::Hash(int _n1, int _n2, int _n3, int _n4, int _n5)
 	n3 = abs(_n3) % MAXRANGE + 1;
 	n4 = abs(_n4) % MAXRANGE + 1;
 	n5 = abs(_n5) % MAXRANGE + 1;
-	table = static_cast<List**>(Heap::Instance().get_mem(n1 * n2 * n3 * n4 * n5 * sizeof(List*)));
+	table = new List*[n1 * n2 * n3 * n4 * n5 + 1];
+	for (int i = 0; i < n1 * n2 * n3 * n4 * n5; i++)
+		table[i] = nullptr;
 	//массив из указателей на листы, выделяем память
 }
 
@@ -28,12 +31,13 @@ Hash::~Hash()
 			}
 		}
 		delete[] table;
-		table = nullptr;
+		Heap::Instance().free_mem(table);
 	}
 }
 
 List* Hash::find_list(char* key_word)
 {
+	if (table[combine_keys(key_word)] == nullptr) table[combine_keys(key_word)] = new List(sizeof(TValueKeeper));
 	if (key_word)
 		return table[combine_keys(key_word)];
 
@@ -44,10 +48,14 @@ int Hash::combine_keys(char* key_word)
 {
 	return
 		abs(key5(key_word)) % n5 +
-		abs(key4(key_word)) % n4 * n4 +
-		abs(key3(key_word)) % n3 * n3 * n4 +
-		abs(key2(key_word)) % n2 * n2 * n3 * n4 +
-		abs(key1(key_word)) % n1 * n1 * n2 * n3 * n4;
+		abs(key4(key_word)) % n4 +
+		abs(key3(key_word)) % n3 +
+		abs(key2(key_word)) % n2 +
+		abs(key1(key_word)) % n1;
+	//92,1, 1, 1, 1 - 92%n1
+	//10,10,1, 1, 1 - 10%n1 + 10%n2
+	//10,10,10,1, 1 - 10%n1 + 10%n2 + 10%n3
+	//20,10,5, 2, 1 - 2%n4 + 5%n3 + 10%n2 + 20%n1
 }
 
 Diction_list::Diction_list(): List(sizeof(Article))
@@ -116,6 +124,7 @@ Diction::Diction() : Hash(33, 33, 0, 0, 0)
 
 Diction::~Diction()
 {
+	Hash::~Hash();
 }
 
 int Diction::key1(char* key_word)

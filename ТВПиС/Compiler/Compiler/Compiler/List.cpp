@@ -1,10 +1,11 @@
 #include "stdafx.h"
 #include "List.h"
 #include <exception>
+#include "Exceptions.h"
 
 using namespace std;
 
-List::List(int element_size, int element_count)
+List::List(const int element_size, int element_count)
 {
 	if (element_size <= 0 || element_count <= 0) throw new bad_alloc();
 
@@ -49,6 +50,36 @@ void* List::get(int pos)
 	return data;
 }
 
+List::Segment* List::get_segment(int id) const
+{
+	Segment* i = first;
+	int n = 0;
+	if (id > segment_count || id < 0) return nullptr;
+
+	while (n != id)
+	{
+		i = i->next;
+		n++;
+	}
+	return i;
+}
+
+bool List::is_free(Segment* segment) const
+{
+	Segment* i = first;
+	int j = 0;
+	while (i)
+	{
+		j++;
+		i = i->next;
+	}
+
+	if (last_index /*+ firstIndex*/ <= (j - 1) * element_count)
+		return true;
+
+	return false;
+}
+
 void List::copy_element(void* destination, void* source) const
 {
 	for (int i = 0; i < element_size; i++)
@@ -62,44 +93,39 @@ void List::add(void* data)
 		throw new bad_alloc;
 
 	//Текущее количество сегментов
-	const int segment_number = last_index / element_count;
+	int segment_number = 0;
+	if (last_index >= element_count) segment_number = last_index / element_count;
 	const int cell = last_index % element_count;
 
 	Segment* segment = nullptr;
 
 	//Если cell равно нулю, создадим новый сегмент, иначе получим сегмент с номером segment_number
+	//Segment* segment = (cell == 0) ? NewSegment() : GetSegment(segmentNumber);
+	//char* offset = (char*)segment->data + (cell * elementSize);
 	if (cell == 0)
 	{
 		new_segment();
+		segment = this->last;
 	}
 	else
 	{
 		//Получение нужного сегмента в segment
-		Segment* i = first;
-		int n = 0;
-		if (segment_number > segment_count || segment_number < 0) segment = nullptr;
-
-		while (n != segment_number)
-		{
-			i = i->next;
-			n++;
-		}
-		segment = i;
+		segment = get_segment(segment_number);
 	}
 
-	//Если сегмент остался нулевым по каким-то причинам, зкаончим функцию ничего не сделав
+	//Если сегмент остался нулевым по каким-то причинам, закончим функцию ничего не сделав
 	if (segment == nullptr)
 	{
 		return;
 	}
 
 	//Зададим offset и скопируем туда данные для добавления
-	char* offset = static_cast<char*>(segment->data) + cell * element_size;
+	void* offset = static_cast<char*>(segment->data) + cell * element_size;
 
-	copy_element(offset, data);
+	copy_element(static_cast<char*>(segment->data) + cell * element_size, data);
 
 	//Увеличим последний индекс на 1
-	last_index++;
+	if (segment_count > 0) last_index++;
 }
 
 void List::take_first(void* store)
@@ -292,36 +318,34 @@ void List::delete_segment(Segment* segment)
 	segment_count--;
 }
 
-/*
-void* List::GetAccessor(int n)
+void* List::get_accessor(int n)
 {
 	n += first_index;
 
 	if (n >= last_index)
-		throw Exceptions::ArgumentOutOfRange;
+		throw ArgumentOutOfRange;
 
-	Segment* currentSegment = GetSegment(n / element_count);
-	int elementIndex = n % element_count;
+	Segment* currentSegment = get_segment(n / element_count);
+	const int element_index = n % element_count;
 
-	char* source = (char*)currentSegment->data + elementIndex * element_size;
+	char* source = static_cast<char*>(currentSegment->data) + element_index * element_size;
 	return source;
 }
 
-void List::SetAccessor(void* data, int n)
+void List::set_accessor(void* data, int n)
 {
 	n += first_index;
-	Segment* currentSegment = GetSegment(n / element_count);
-	int elementIndex = n % element_count;
+	Segment* currentSegment = get_segment(n / element_count);
+	const int element_index = n % element_count;
 
-	char* source = (char*)currentSegment->data + elementIndex * element_size;
+	char* source = static_cast<char*>(currentSegment->data) + element_index * element_size;
 	copy_element(source, data);
 }
 
 void List::swap(int a, int b)
 {
 	void* temp = Heap::Instance().get_mem(element_size);
-	copy_element(temp, GetAccessor(a));
-	SetAccessor(GetAccessor(b), a);
-	SetAccessor(temp, b);
+	copy_element(temp, get_accessor(a));
+	set_accessor(get_accessor(b), a);
+	set_accessor(temp, b);
 }
-*/

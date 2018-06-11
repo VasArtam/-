@@ -10,25 +10,26 @@ class Hash
 {
 public:
 	Hash(int _n1 = 0, int _n2 = 0, int _n3 = 0, int _n4 = 0, int _n5 = 0); //области значений каждой из пяти функций (таблица 3*3 - 3 3 0 0 0)
+protected:
 	~Hash();
 
+public:
 	//Самая важная функция, получает ключевое слово и возвращает указатель на отдельный лист
-	List* find_list(char* key_word);;
+	List* find_list(char* key_word);
 
 	//Переопределить, можно использовать до 5 функций
-	virtual int key1(char* key_word) { return 0; };
-	virtual int key2(char* key_word) { return 0; };
-	virtual int key3(char* key_word) { return 0; };
-	virtual int key4(char* key_word) { return 0; };
-	virtual int key5(char* key_word) { return 0; };
+	virtual int key1(char* key_word) { return 0; }
+	virtual int key2(char* key_word) { return 0; }
+	virtual int key3(char* key_word) { return 0; }
+	virtual int key4(char* key_word) { return 0; }
+	virtual int key5(char* key_word) { return 0; }
 
 protected:
 	//Определяет позицию в векторе из указателей
-	int combine_keys(char* key_word);;
+	int combine_keys(char* key_word);
 
-private:
 	List** table; //сама хэш-таблица
-	int    n1, n2, n3, n4, n5; //Области значений
+	int n1, n2, n3, n4, n5; //области значений
 };
 
 //Отдельная запись "слово-толкование"

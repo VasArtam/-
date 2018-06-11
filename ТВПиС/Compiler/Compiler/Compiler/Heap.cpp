@@ -25,7 +25,7 @@ void* Heap::get_mem(int size)
 	//Ищем, есть ли в предыдущих сегментах достаточно памяти для size
 	//Поиск начинаем в обратном порядке: от текущего до первого
 	Segment* s = current;
-
+		
 	while (s != nullptr)
 	{
 		const int descriptor_count = s->descriptor_count;
@@ -208,16 +208,17 @@ void Heap::make_segment()
 {
 	Segment* temp = static_cast<Segment*>(malloc(segment_size)); //Выделяем память под новый сегмент
 	const unsigned descriptors_size = sizeof(Segment_def) * 1024;
-	temp->data = temp + descriptors_size; //Указатель на часть с данными
+	const unsigned meta = sizeof(Segment*) + sizeof(int);
+	temp->data = reinterpret_cast<char*>(temp) + descriptors_size + meta; //Указатель на часть с данными
 	temp->prev = current; //Предыдущий сегмент - текущий
 
 	Segment_def* first_descriptor = &temp->descriptor[0];
 	//Задаем параметры первого блока
 	first_descriptor->used = false;
-	first_descriptor->size = segment_size - descriptors_size; //Размер всего сегмента минус размер массива дескрипторов
-	first_descriptor->offset = temp->data; //Указатель на часть данными
+	first_descriptor->size = segment_size - descriptors_size - meta; //Размер всего сегмента минус размер массива дескрипторов
+	first_descriptor->offset = temp->data; //Указатель на часть с данными
 
-	temp->descriptor_count = 1; //Количество блоков - 1
+	temp->descriptor_count < 0 ? temp->descriptor_count = 1 : temp->descriptor_count++; //Количество блоков - 1, или просто увеличивается
 
 	current = temp; //Текущий становится новым
 };

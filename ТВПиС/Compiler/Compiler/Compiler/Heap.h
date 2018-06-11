@@ -1,7 +1,5 @@
 #pragma once
-
-#define SEGMENTSIZE 65539
-#define DESCRIPTORCOUNT 1024
+#include "Defaults.h"
 
 class Heap
 {
@@ -28,16 +26,16 @@ private:
 
 	struct Segment
 	{
-		void* data;
-
 		//Указатель на предыдущий сегмент
 		Segment* prev;
+
+		//Текущее количество дескрипторов (как ID: auto-increment и только увеличивается)
+		int descriptor_count;
 
 		//Массив дескрипторов
 		Segment_def descriptor[DESCRIPTORCOUNT];
 
-		//Текущее количество дескрипторов (как ID: auto-increment и только увеличивается)
-		int descriptor_count;
+		void* data;
 	};
 
 	//Создает новый сегмент, устанавливает current на этот сегмент
